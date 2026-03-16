@@ -29,6 +29,7 @@ def insert_sensor_data(temp, humidity, light):
         f"INSERT INTO sensor_data (temperature, humidity, light_level) VALUES ({temp}, {humidity}, {light});"
     )
 
+    print("New data sucessfully inserted")
     conn.commit()
     conn.close()
 

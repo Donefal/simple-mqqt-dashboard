@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
+from database.db import insert_sensor_data
+
 from config import MQTT_BROKER, MQTT_PORT, MQTT_PASSWORD, MQTT_TOPIC, MQTT_USERNAME
 
 def on_connect(client, userdata, flags, rc, properties):
@@ -19,7 +21,8 @@ def on_message(client, userdata, msg):
 	temperature = data.get("temp")
 	humidity = data.get("humidity")
 	light_level = data.get("light")
-	
+
+	insert_sensor_data(temperature, humidity, light_level)
 	print(temperature, humidity, light_level)
 
 def start_mqtt():
