@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
-from database.db import insert_sensor_data
+from ..database.db import insert_sensor_data
 
 from config import MQTT_BROKER, MQTT_PORT, MQTT_PASSWORD, MQTT_TOPIC, MQTT_USERNAME
 
