@@ -12,20 +12,20 @@
 #define DHT_TYPE DHT11
 
 // Wifi Settings
-const char* ssid = "realme 8i";
-const char* password = "avinavin";
+const char* SSID = "realme 8i";
+const char* PASSWORD = "avinavin";
 
 // MQTT Broker Settings
-const char *mqtt_broker = "broker.emqx.io";  
-const char *mqtt_topic_led = "avinavin/led";     
-const char *mqtt_topic_sensor = "avinavin/sensor";
-const char *mqtt_username = "emqx";  
-const char *mqtt_password = "public";  
-const int mqtt_port = 1883;  
+const char *MQTT_BROKER = "broker.emqx.io";  
+const char *MQTT_TOPIC_LED = "avinavin/led";     
+const char *MQTT_TOPIC_SENSOR = "avinavin/sensor";
+const char *MQTT_USERNAME = "emqx";  
+const char *MQTT_PASSWORD = "public";  
+const int MQTT_PORT = 1883;  
 
 // Connection initialization
 WiFiClient espClient;
-PubSubClient mqtt_client(espClient);
+PubSubClient mqttc(espClient);
 
 // Global Variable
 unsigned long lastMsgSent = 0;
@@ -51,8 +51,8 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT);
 
-  mqtt_client.setServer(mqtt_broker, mqtt_port);
-  mqtt_client.setCallback(mqttCallback);
+  mqttc.setServer(MQTT_BROKER, MQTT_PORT);
+  mqttc.setCallback(mqttCallback);
 
   // Subscribe to MQTT LED topic
   connectToMqttBroker();
@@ -60,12 +60,12 @@ void setup() {
 
 void loop() {
   // Make sure MQTT LED topic is connected
-  if (!mqtt_client.connected()) {
+  if (!mqttc.connected()) {
     connectToMqttBroker();
   }
 
   // Listen to MQTT msg (trigger callback if there's new msg)
-  mqtt_client.loop();
+  mqttc.loop();
 
   // Gather data & Publish to MQTT every 2 seconds
   if(millis() - lastMsgSent >= 2000) {
@@ -78,13 +78,13 @@ void loop() {
     doc["temperature"] = getTemperature(event);
 
     // Humidity
-    doc["humidty"] = getHumidity(event);
+    doc["humidity"] = getHumidity(event);
 
     // Serialize json to buffer then send it to MQTT broker
     char buffer[200];
     serializeJson(doc, buffer);
     
-    mqtt_client.publish(mqtt_topic_sensor, buffer);
+    mqttc.publish(MQTT_TOPIC_SENSOR, buffer);
   }
 }
 // -------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ void loop() {
 
 // Connect to wifi
 void connectToWifi() {
-  WiFi.begin(ssid, password);
+  WiFi.begin(SSID, PASSWORD);
 
   Serial.print("\nConnecting to WiFi");
   while(WiFi.status() != WL_CONNECTED) {
@@ -111,21 +111,21 @@ void connectToWifi() {
 
 // Connect and listen to MQTT LED Topic
 void connectToMqttBroker() {
-  while(!mqtt_client.connected()) {
+  while(!mqttc.connected()) {
     String client_id = "esp8266-client" + String(WiFi.macAddress());
     Serial.printf("Connecting to MQTT Broker as %s...\n", client_id.c_str());
 
-    if(mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
+    if(mqttc.connect(client_id.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
       Serial.println("Connected to MQTT Broker");
 
       // Subscribe to LED topic here
-      mqtt_client.subscribe(mqtt_topic_led);  
+      mqttc.subscribe(MQTT_TOPIC_LED);  
 
       // Check connection by publishing a message
-      mqtt_client.publish(mqtt_topic_led, "ESP8266 Listening to LED's Topic");
+      mqttc.publish(MQTT_TOPIC_LED, "ESP8266 Listening to LED's Topic");
     } else {
       Serial.print("Failed to connect to MQTT broker, rc=");
-      Serial.print(mqtt_client.state());
+      Serial.print(mqttc.state());
       Serial.println(" try again in 5 seconds");
       delay(5000);
     }
@@ -150,7 +150,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
   Serial.println();
   Serial.println("------------------");
 
-  if(data["led_con"]){
+  if(data["led_state"]){
     digitalWrite(LED_PIN, HIGH);
   } else {
     digitalWrite(LED_PIN, LOW);
