@@ -3,8 +3,10 @@ import json
 import time
 
 from config import MQTT_BROKER, MQTT_PORT, MQTT_PASSWORD, MQTT_USERNAME, MQTT_TOPIC_LED
+from src.database.db import get_led_state
 
-def publish_to_mqtt_led(led_state):
+# FIXME: This is somehow not working at dashboard.py
+async def publish_to_mqtt_led(led_state):
     unacked_publish = set()
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 	
@@ -24,3 +26,7 @@ def publish_to_mqtt_led(led_state):
 
     mqttc.disconnect()
     mqttc.loop_stop()
+
+def publish_init():
+    led_state = get_led_state()
+    publish_to_mqtt_led(led_state)

@@ -1,4 +1,6 @@
 import sqlite3
+import pandas as pd
+
 from config import DATABASE
 
 def get_connection():
@@ -46,6 +48,10 @@ def create_table_if_not_exists():
     conn.commit()
     conn.close()
 
+# ----------------------------------------------------------
+# SENSOR STUFF
+# ----------------------------------------------------------
+
 def insert_sensor_data(temp, humidity):
     conn = get_connection()
     cur = conn.cursor()
@@ -59,20 +65,45 @@ def insert_sensor_data(temp, humidity):
     conn.commit()
     conn.close()
 
-def change_led_data(led_state):
+def get_sensor_data():
+    conn = get_connection()
+
+    sql_query = "SELECT * FROM sensor_data ORDER BY timestamp DESC LIMIT 100"
+
+    df = pd.read_sql_query(sql=sql_query, con=conn)
+    return df
+
+# ----------------------------------------------------------
+# LED STUFF
+# ----------------------------------------------------------
+def change_led_state(led_state):
     conn = get_connection()
     cur = conn.cursor()
 
-    # FIXME: STILL EROR ON THIS EXECUTE FUNCTION
+    # Change LED State
     cur.execute(
         """
         UPDATE led_data
-        SET state = 1
+        SET state = (?)
         WHERE id = 0;
-        """
+        """, 
+        (led_state,)
     )
 
     print("LED sucessfully changed")
     conn.commit()
     conn.close()
 
+def get_led_state():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT state FROM led_data WHERE id = 0;"
+    )
+
+    state = cur.fetchone()
+    if state:
+        return state
+    else:
+        print("ERROR on getting LED State")
