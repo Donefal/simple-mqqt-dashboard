@@ -68,7 +68,7 @@ def insert_sensor_data(temp, humidity):
 def get_sensor_data():
     conn = get_connection()
 
-    sql_query = "SELECT * FROM sensor_data ORDER BY timestamp DESC LIMIT 100"
+    sql_query = "SELECT * FROM sensor_data ORDER BY timestamp DESC LIMIT 10"
 
     df = pd.read_sql_query(sql=sql_query, con=conn)
     return df
@@ -90,7 +90,7 @@ def change_led_state(led_state):
         (led_state,)
     )
 
-    print("LED sucessfully changed")
+    print("LED data sucessfully changed")
     conn.commit()
     conn.close()
 

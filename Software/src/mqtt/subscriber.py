@@ -32,6 +32,7 @@ def start_mqtt_subscriber():
 	mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 	mqttc.on_connect = on_connect
 	mqttc.on_message = on_message
+	mqttc.on_disconnect = start_mqtt_subscriber
 	
 	mqttc.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 	mqttc.connect(MQTT_BROKER, MQTT_PORT, 60)
